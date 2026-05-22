@@ -70,7 +70,8 @@ export const useGameLogic = ({ dimensions }: UseGameLogicProps) => {
   useEffect(() => {
     (async () => {
       const loaded = await loadHighScores();
-      setGameState(prev => ({ ...prev, highScoresByLevel: loaded }));
+      const maxHighScore = Object.values(loaded).length > 0 ? Math.max(...Object.values(loaded)) : 0;
+      setGameState(prev => ({ ...prev, highScoresByLevel: loaded, highScore: maxHighScore }));
     })();
   }, []);
 
@@ -106,16 +107,18 @@ export const useGameLogic = ({ dimensions }: UseGameLogicProps) => {
 
   const gameOver = useCallback(() => {
     setGameState(prev => {
-      const newHighScore = Math.max(prev.score, prev.highScore);
+      const finalScore = prev.score;
+      const newHighScore = Math.max(finalScore, prev.highScore);
       const newHighScoresByLevel = { ...prev.highScoresByLevel };
-      if (!newHighScoresByLevel[prev.level] || prev.score > newHighScoresByLevel[prev.level]) {
-        newHighScoresByLevel[prev.level] = prev.score;
+      
+      if (!newHighScoresByLevel[prev.level] || finalScore > newHighScoresByLevel[prev.level]) {
+        newHighScoresByLevel[prev.level] = finalScore;
         saveHighScores(newHighScoresByLevel);
       }
 
-      // Track achievements
+      // Track achievements - pass final game data
       progression.checkAchievements({
-        score: prev.score,
+        score: finalScore,
         combo: prev.combo,
         shapesSliced: prev.shapesSliced,
         level: prev.level,
@@ -123,12 +126,12 @@ export const useGameLogic = ({ dimensions }: UseGameLogicProps) => {
       });
 
       // Update level progress
-      progression.updateLevelScore(prev.level, prev.score);
+      progression.updateLevelScore(prev.level, finalScore);
 
       // Add leaderboard entry
       leaderboard.addEntry({
         playerName: leaderboard.leaderboard.playerName,
-        score: prev.score,
+        score: finalScore,
         level: prev.level,
         timestamp: Date.now(),
         combo: prev.combo,
@@ -136,12 +139,12 @@ export const useGameLogic = ({ dimensions }: UseGameLogicProps) => {
       });
 
       // Update daily challenge
-      leaderboard.updateDailyChallenge(prev.score);
+      leaderboard.updateDailyChallenge(finalScore);
 
       return {
         ...prev,
         status: 'gameOver',
-        lastScore: prev.score,
+        lastScore: finalScore,
         highScore: newHighScore,
         highScoresByLevel: newHighScoresByLevel,
       };

@@ -131,131 +131,176 @@ export const useProgression = () => {
       level: number;
       lives: number;
     }) => {
-      const updated = { ...progression };
-      const newUnlocked: AchievementId[] = [];
+      setProgression(prevProgression => {
+        const updated = { ...prevProgression };
+        updated.achievements = { ...prevProgression.achievements };
+        const newUnlocked: AchievementId[] = [];
 
-      // First Slice
-      if (gameData.shapesSliced > 0 && !progression.achievements['first-slice'].unlockedAt) {
-        updated.achievements['first-slice'].unlockedAt = Date.now();
-        newUnlocked.push('first-slice');
-      }
+        // First Slice
+        if (gameData.shapesSliced > 0 && !prevProgression.achievements['first-slice'].unlockedAt) {
+          updated.achievements['first-slice'] = {
+            ...prevProgression.achievements['first-slice'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('first-slice');
+        }
 
-      // Combo achievements
-      if (gameData.combo >= 10 && !progression.achievements['combo-10'].unlockedAt) {
-        updated.achievements['combo-10'].unlockedAt = Date.now();
-        newUnlocked.push('combo-10');
-      }
-      if (gameData.combo >= 25 && !progression.achievements['combo-25'].unlockedAt) {
-        updated.achievements['combo-25'].unlockedAt = Date.now();
-        newUnlocked.push('combo-25');
-      }
-      if (gameData.combo >= 50 && !progression.achievements['combo-50'].unlockedAt) {
-        updated.achievements['combo-50'].unlockedAt = Date.now();
-        newUnlocked.push('combo-50');
-      }
+        // Combo achievements
+        if (gameData.combo >= 10 && !prevProgression.achievements['combo-10'].unlockedAt) {
+          updated.achievements['combo-10'] = {
+            ...prevProgression.achievements['combo-10'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('combo-10');
+        }
+        if (gameData.combo >= 25 && !prevProgression.achievements['combo-25'].unlockedAt) {
+          updated.achievements['combo-25'] = {
+            ...prevProgression.achievements['combo-25'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('combo-25');
+        }
+        if (gameData.combo >= 50 && !prevProgression.achievements['combo-50'].unlockedAt) {
+          updated.achievements['combo-50'] = {
+            ...prevProgression.achievements['combo-50'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('combo-50');
+        }
 
-      // Shape count achievements (update progress)
-      updated.totalShapesSliced += gameData.shapesSliced;
-      if (
-        updated.totalShapesSliced >= 100 &&
-        !progression.achievements['shapes-100'].unlockedAt
-      ) {
-        updated.achievements['shapes-100'].unlockedAt = Date.now();
-        newUnlocked.push('shapes-100');
-      }
-      if (
-        updated.totalShapesSliced >= 500 &&
-        !progression.achievements['shapes-500'].unlockedAt
-      ) {
-        updated.achievements['shapes-500'].unlockedAt = Date.now();
-        newUnlocked.push('shapes-500');
-      }
-      if (
-        updated.totalShapesSliced >= 1000 &&
-        !progression.achievements['shapes-1000'].unlockedAt
-      ) {
-        updated.achievements['shapes-1000'].unlockedAt = Date.now();
-        newUnlocked.push('shapes-1000');
-      }
+        // Shape count achievements (update progress)
+        updated.totalShapesSliced = prevProgression.totalShapesSliced + gameData.shapesSliced;
+        if (
+          updated.totalShapesSliced >= 100 &&
+          !prevProgression.achievements['shapes-100'].unlockedAt
+        ) {
+          updated.achievements['shapes-100'] = {
+            ...prevProgression.achievements['shapes-100'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('shapes-100');
+        }
+        if (
+          updated.totalShapesSliced >= 500 &&
+          !prevProgression.achievements['shapes-500'].unlockedAt
+        ) {
+          updated.achievements['shapes-500'] = {
+            ...prevProgression.achievements['shapes-500'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('shapes-500');
+        }
+        if (
+          updated.totalShapesSliced >= 1000 &&
+          !prevProgression.achievements['shapes-1000'].unlockedAt
+        ) {
+          updated.achievements['shapes-1000'] = {
+            ...prevProgression.achievements['shapes-1000'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('shapes-1000');
+        }
 
-      // Level achievements
-      if (gameData.level >= 5 && !progression.achievements['level-5'].unlockedAt) {
-        updated.achievements['level-5'].unlockedAt = Date.now();
-        newUnlocked.push('level-5');
-      }
-      if (gameData.level >= 10 && !progression.achievements['level-10'].unlockedAt) {
-        updated.achievements['level-10'].unlockedAt = Date.now();
-        newUnlocked.push('level-10');
-      }
+        // Level achievements
+        if (gameData.level >= 5 && !prevProgression.achievements['level-5'].unlockedAt) {
+          updated.achievements['level-5'] = {
+            ...prevProgression.achievements['level-5'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('level-5');
+        }
+        if (gameData.level >= 10 && !prevProgression.achievements['level-10'].unlockedAt) {
+          updated.achievements['level-10'] = {
+            ...prevProgression.achievements['level-10'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('level-10');
+        }
 
-      // Score achievements
-      if (gameData.score >= 1000 && !progression.achievements['high-score-1000'].unlockedAt) {
-        updated.achievements['high-score-1000'].unlockedAt = Date.now();
-        newUnlocked.push('high-score-1000');
-      }
-      if (gameData.score >= 5000 && !progression.achievements['high-score-5000'].unlockedAt) {
-        updated.achievements['high-score-5000'].unlockedAt = Date.now();
-        newUnlocked.push('high-score-5000');
-      }
-      if (gameData.score >= 10000 && !progression.achievements['high-score-10000'].unlockedAt) {
-        updated.achievements['high-score-10000'].unlockedAt = Date.now();
-        newUnlocked.push('high-score-10000');
-      }
+        // Score achievements
+        if (gameData.score >= 1000 && !prevProgression.achievements['high-score-1000'].unlockedAt) {
+          updated.achievements['high-score-1000'] = {
+            ...prevProgression.achievements['high-score-1000'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('high-score-1000');
+        }
+        if (gameData.score >= 5000 && !prevProgression.achievements['high-score-5000'].unlockedAt) {
+          updated.achievements['high-score-5000'] = {
+            ...prevProgression.achievements['high-score-5000'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('high-score-5000');
+        }
+        if (gameData.score >= 10000 && !prevProgression.achievements['high-score-10000'].unlockedAt) {
+          updated.achievements['high-score-10000'] = {
+            ...prevProgression.achievements['high-score-10000'],
+            unlockedAt: Date.now(),
+          };
+          newUnlocked.push('high-score-10000');
+        }
 
-      // Update longest combo
-      if (gameData.combo > updated.longestCombo) {
-        updated.longestCombo = gameData.combo;
-      }
+        // Update longest combo
+        if (gameData.combo > prevProgression.longestCombo) {
+          updated.longestCombo = gameData.combo;
+        }
 
-      if (newUnlocked.length > 0) {
-        setProgression(updated);
-        setNewAchievements(newUnlocked);
-        await saveProgressionState(updated);
-      }
+        // Only save and update UI if achievements were unlocked
+        if (newUnlocked.length > 0) {
+          saveProgressionState(updated);
+          setNewAchievements(newUnlocked);
+        }
+
+        return updated;
+      });
     },
-    [progression]
+    []
   );
 
   const updateLevelScore = useCallback(
     async (level: number, score: number) => {
-      const updated = { ...progression };
-      const levelProgress = updated.levelProgress[level] || {
-        level,
-        bestScore: 0,
-        stars: 0,
-        completed: false,
-        attempts: 1,
-        unlockedAt: Date.now(),
-      };
+      setProgression(prevProgression => {
+        const updated = { ...prevProgression };
+        updated.levelProgress = { ...prevProgression.levelProgress };
+        
+        const levelProgress = updated.levelProgress[level] || {
+          level,
+          bestScore: 0,
+          stars: 0,
+          completed: false,
+          attempts: 1,
+          unlockedAt: Date.now(),
+        };
 
-      levelProgress.attempts = (levelProgress.attempts || 0) + 1;
+        levelProgress.attempts = (levelProgress.attempts || 0) + 1;
 
-      // Calculate stars based on score thresholds
-      const baseScore = 500 * level;
-      let stars = 0;
-      if (score >= baseScore) stars = 1;
-      if (score >= baseScore * 1.5) stars = 2;
-      if (score >= baseScore * 2) stars = 3;
+        // Calculate stars based on score thresholds
+        const baseScore = 500 * level;
+        let stars = 0;
+        if (score >= baseScore) stars = 1;
+        if (score >= baseScore * 1.5) stars = 2;
+        if (score >= baseScore * 2) stars = 3;
 
-      if (score > levelProgress.bestScore) {
-        levelProgress.bestScore = score;
-        levelProgress.stars = Math.max(levelProgress.stars, stars);
-        levelProgress.completed = true;
-      }
+        if (score > levelProgress.bestScore) {
+          levelProgress.bestScore = score;
+          levelProgress.stars = Math.max(levelProgress.stars, stars);
+          levelProgress.completed = true;
+        }
 
-      // Unlock next level
-      if (levelProgress.completed && !updated.unlockedLevels.includes(level + 1)) {
-        updated.unlockedLevels.push(level + 1);
-        updated.unlockedLevels.sort((a, b) => a - b);
-      }
+        // Unlock next level
+        if (levelProgress.completed && !updated.unlockedLevels.includes(level + 1)) {
+          updated.unlockedLevels = [...updated.unlockedLevels, level + 1];
+          updated.unlockedLevels.sort((a, b) => a - b);
+        }
 
-      updated.levelProgress[level] = levelProgress;
-      updated.totalGamesPlayed += 1;
+        updated.levelProgress[level] = levelProgress;
+        updated.totalGamesPlayed = prevProgression.totalGamesPlayed + 1;
 
-      setProgression(updated);
-      await saveProgressionState(updated);
+        saveProgressionState(updated);
+        return updated;
+      });
     },
-    [progression]
+    []
   );
 
   const clearNewAchievements = useCallback(() => {
