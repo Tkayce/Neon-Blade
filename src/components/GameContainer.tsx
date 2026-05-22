@@ -6,13 +6,26 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import type { GameDimensions, Trail, TrailPoint } from '@/types/game';
 import { Ionicons } from '@expo/vector-icons';
-import { Canvas, Paint, Path, Skia } from '@shopify/react-native-skia';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect } from 'react';
-import { AppState, Dimensions, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { AppState, Dimensions, Platform, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { s } from 'react-native-wind';
+
+// Conditionally import Skia components only on native platforms
+let Canvas: any = null;
+let Paint: any = null;
+let Path: any = null;
+let Skia: any = null;
+
+if (Platform.OS !== 'web') {
+  const skiaImport = require('@shopify/react-native-skia');
+  Canvas = skiaImport.Canvas;
+  Paint = skiaImport.Paint;
+  Path = skiaImport.Path;
+  Skia = skiaImport.Skia;
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -109,7 +122,7 @@ const GameContainer: React.FC = () => {
 
   // Create Skia path from trail points
   const createTrailPath = () => {
-    if (trail.points.length < 2) return null;
+    if (Platform.OS === 'web' || !Skia || trail.points.length < 2) return null;
 
     const path = Skia.Path.Make();
     const firstPoint = trail.points[0];
@@ -570,32 +583,34 @@ const GameContainer: React.FC = () => {
               minDist={0}
             >
               <View style={{ flex: 1 }}>
-                {/* Game Canvas */}
-                <Canvas style={{ flex: 1 }}>
-                  {trailPath && (
-                    <>
-                      {/* Transparent trail (no color) */}
-                      <Path path={trailPath}>
-                        <Paint
-                          style="stroke"
-                          strokeWidth={12}
-                          color="rgba(0,0,0,0)"
-                          strokeCap="round"
-                          strokeJoin="round"
-                        />
-                      </Path>
-                      <Path path={trailPath}>
-                        <Paint
-                          style="stroke"
-                          strokeWidth={8}
-                          color="rgba(0,0,0,0)"
-                          strokeCap="round"
-                          strokeJoin="round"
-                        />
-                      </Path>
-                    </>
-                  )}
-                </Canvas>
+                {/* Game Canvas - Skip on web to avoid Skia rendering issues */}
+                {Platform.OS !== 'web' && Canvas && (
+                  <Canvas style={{ flex: 1 }}>
+                    {trailPath && (
+                      <>
+                        {/* Transparent trail (no color) */}
+                        <Path path={trailPath}>
+                          <Paint
+                            style="stroke"
+                            strokeWidth={12}
+                            color="rgba(0,0,0,0)"
+                            strokeCap="round"
+                            strokeJoin="round"
+                          />
+                        </Path>
+                        <Path path={trailPath}>
+                          <Paint
+                            style="stroke"
+                            strokeWidth={8}
+                            color="rgba(0,0,0,0)"
+                            strokeCap="round"
+                            strokeJoin="round"
+                          />
+                        </Path>
+                      </>
+                    )}
+                  </Canvas>
+                )}
                 
                 {/* Game Objects */}
                 <Spawner

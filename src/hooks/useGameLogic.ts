@@ -478,11 +478,50 @@ export const useGameLogic = ({ dimensions }: UseGameLogicProps) => {
       // End game if lives reach 0
       if (newLives <= 0) {
         setTimeout(() => {
-          setGameState(prevState => ({
-            ...prevState,
-            status: 'gameOver',
-            lives: 0,
-          }));
+          setGameState(prevState => {
+            const gameOverFinalScore = prevState.score;
+            const gameOverHighScore = Math.max(gameOverFinalScore, prevState.highScore);
+            const gameOverHighScoresByLevel = { ...prevState.highScoresByLevel };
+            
+            if (!gameOverHighScoresByLevel[prevState.level] || gameOverFinalScore > gameOverHighScoresByLevel[prevState.level]) {
+              gameOverHighScoresByLevel[prevState.level] = gameOverFinalScore;
+              saveHighScores(gameOverHighScoresByLevel);
+            }
+
+            // Track achievements
+            progression.checkAchievements({
+              score: gameOverFinalScore,
+              combo: prevState.combo,
+              shapesSliced: prevState.shapesSliced,
+              level: prevState.level,
+              lives: 0,
+            });
+
+            // Update level progress
+            progression.updateLevelScore(prevState.level, gameOverFinalScore);
+
+            // Add leaderboard entry
+            leaderboard.addEntry({
+              playerName: leaderboard.leaderboard.playerName,
+              score: gameOverFinalScore,
+              level: prevState.level,
+              timestamp: Date.now(),
+              combo: prevState.combo,
+              shapesSliced: prevState.shapesSliced,
+            });
+
+            // Update daily challenge
+            leaderboard.updateDailyChallenge(gameOverFinalScore);
+
+            return {
+              ...prevState,
+              status: 'gameOver',
+              lives: 0,
+              lastScore: gameOverFinalScore,
+              highScore: gameOverHighScore,
+              highScoresByLevel: gameOverHighScoresByLevel,
+            };
+          });
         }, 300);
         newLives = 0;
       }

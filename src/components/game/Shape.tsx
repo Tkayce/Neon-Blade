@@ -1,10 +1,23 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import type { GameDimensions, GameShape } from '@/types/game';
-import { Canvas, Circle, Paint, Rect } from '@shopify/react-native-skia';
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { s } from 'react-native-wind';
+
+// Conditionally import Skia components only on native platforms
+let Canvas: any = null;
+let Circle: any = null;
+let Paint: any = null;
+let Rect: any = null;
+
+if (Platform.OS !== 'web') {
+  const skiaImport = require('@shopify/react-native-skia');
+  Canvas = skiaImport.Canvas;
+  Circle = skiaImport.Circle;
+  Paint = skiaImport.Paint;
+  Rect = skiaImport.Rect;
+}
 
 interface ShapeProps {
   shape: GameShape;
@@ -240,30 +253,32 @@ const Shape: React.FC<ShapeProps> = ({ shape, dimensions, onReachBottom, onDestr
         </View>
       )}
       
-      {/* Enhanced Canvas rendering for additional effects */}
-      <Canvas style={{ 
-        width: size * 2, 
-        height: size * 2,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-      }}>
-        {type === 'circle' ? (
-          <Circle cx={size} cy={size} r={size * 0.9}>
-            <Paint
-              color={theme.background}
-              style="fill"
-            />
-          </Circle>
-        ) : (
-          <Rect x={size * 0.1} y={size * 0.1} width={size * 1.8} height={size * 1.8}>
-            <Paint
-              color={theme.background}
-              style="fill"
-            />
-          </Rect>
-        )}
-      </Canvas>
+      {/* Enhanced Canvas rendering for additional effects (native only) */}
+      {Platform.OS !== 'web' && Canvas && (
+        <Canvas style={{ 
+          width: size * 2, 
+          height: size * 2,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}>
+          {type === 'circle' ? (
+            <Circle cx={size} cy={size} r={size * 0.9}>
+              <Paint
+                color={theme.background}
+                style="fill"
+              />
+            </Circle>
+          ) : (
+            <Rect x={size * 0.1} y={size * 0.1} width={size * 1.8} height={size * 1.8}>
+              <Paint
+                color={theme.background}
+                style="fill"
+              />
+            </Rect>
+          )}
+        </Canvas>
+      )}
     </Animated.View>
   );
 };
